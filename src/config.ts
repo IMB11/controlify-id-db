@@ -4,7 +4,8 @@ import * as JSONC from "jsonc-parser";
 
 interface Config {
   databaseFileLocation: string,
-  port: number
+  port: number,
+  deleteBuzzWord: string,
 }
 
 export default function getConfig(): Config {

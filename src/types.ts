@@ -1,4 +1,5 @@
 export interface Controller {
+  databaseID: number,
   vendorID: number,
   productID: number,
   GUID: string,

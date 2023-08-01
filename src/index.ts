@@ -37,6 +37,42 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
     })
   );
 
+  app.delete("/api/v1/delete", async (req, res) => {
+    if (req.query.key != config.deleteBuzzWord) {
+      res.status(400).send({
+        error: true,
+        message: "Unauthorized."
+      });
+      return;
+    }
+
+    const id = req.body.id;
+    console.log("Deleting everything about " + id);
+
+    try {
+      const deleteControllerQuery = `
+        DELETE FROM Controllers
+        WHERE controllerID = ?
+      `;
+      await db.run(deleteControllerQuery, id);
+
+      const deleteReportedNamesQuery = `
+        DELETE FROM ReportedNames
+        WHERE controllerID = ?
+      `;
+      await db.run(deleteReportedNamesQuery, id);
+      res.status(200).send({
+        message: "Deleted."
+      });
+    } catch (error) {
+      res.status(500).send({
+        error: true,
+        message: error
+      });
+      return;
+    }
+  })
+
   app.post("/api/v1/submit", async (req, res) => {
     const submission: ControllerSubmission = req.body;
 

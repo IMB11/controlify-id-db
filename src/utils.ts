@@ -28,6 +28,7 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
       const reportedNames = reportedNamesRows.map((reportedNameRow: any) => reportedNameRow.ReportedName);
 
       const controller: Controller = {
+        databaseID: ControllerID,
         vendorID: VendorID,
         productID: ProductID,
         GUID: GUID,
