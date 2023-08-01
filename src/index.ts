@@ -118,6 +118,10 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
     }
   });
 
+  app.get("/", (req, res) => res.status(200).send({
+    message: "Hi!"
+  }))
+
   app.get("/api/v1/submissions", async (req, res) => {
     try {
       const controllers: Controller[] = await getControllersFromDatabase(db);
