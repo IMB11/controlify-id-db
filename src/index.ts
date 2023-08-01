@@ -66,8 +66,10 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
           let stmt = await db.prepare(`
           INSERT INTO Controllers(VendorID, ProductID, GUID) VALUES (?, ?, ?)
         `);
+          console.log("1")
 
           stmt.run(submission.vendorID, submission.productID, submission.GUID);
+          console.log("2")
           stmt.finalize();
 
           stmt = await db.prepare(`SELECT last_insert_rowid() AS controllerID`);

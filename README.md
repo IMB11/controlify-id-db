@@ -22,7 +22,7 @@ npm install
 Launching the instance:
 
 ```
-pm2 start npm --name "Controllify Identification API" -- start
+pm2 start npm --name "Controlify Identification API" -- start
 ```
 
 Making sure it restarts if the server restarts/shuts down suddenly:

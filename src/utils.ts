@@ -47,26 +47,25 @@ export function getControllerIDIfExists(
   submission: ControllerSubmission,
   db: Database
 ): Promise<number | null> {
-  return new Promise<number | null>((resolve, reject) => {
+  return new Promise<number | null>(async (resolve, reject) => {
     const controllerQuery = `
-      SELECT controllerID
+      SELECT ControllerID
       FROM Controllers
       WHERE VendorID = ? AND ProductID = ? AND GUID = ?
     `;
 
-    db.get(
+    const result: any = await db.get(
       controllerQuery,
       submission.vendorID,
       submission.productID,
-      submission.GUID,
-      (controllerErr: any, controllerRow: any) => {
-        if (controllerErr) {
-          reject(controllerErr);
-        } else {
-          resolve(controllerRow ? controllerRow.ControllerID : null);
-        }
-      }
+      submission.GUID
     );
+
+    if (result == null || !result?.ControllerID) {
+      resolve(null);
+    } else {
+      resolve(result.ControllerID);
+    }
   });
 }
 
@@ -74,25 +73,24 @@ export function isReportedNameDuplicate(
   submission: ControllerSubmission,
   db: Database
 ): Promise<boolean> {
-  return new Promise<boolean>((resolve, reject) => {
+  return new Promise<boolean>(async (resolve, reject) => {
     const reportedNameQuery = `
       SELECT COUNT(*) AS count
       FROM ReportedNames
       WHERE ReportedName = ?
     `;
 
-    db.get(
+    const result: any = await db.get(
       reportedNameQuery,
-      submission.reportedName,
-      (reportedNameErr: any, row: any) => {
-        if (reportedNameErr) {
-          reject(reportedNameErr);
-        } else {
-          const count = row.count;
-          resolve(count > 0);
-        }
-      }
+      submission.reportedName
     );
+
+    if (!result || !result?.count) {
+      resolve(false);
+    } else {
+      const count = result.count;
+      resolve(count > 0);
+    }
   });
 }
 
