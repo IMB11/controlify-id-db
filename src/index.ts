@@ -29,7 +29,7 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
 `);
 
   app.use(bodyParser.json());
-  app.use(
+  app.use("/api/v1/submit",
     rateLimit({
       windowMs: 15 * 60 * 1000, // 15 mins per window.
       max: 15, // max 15 requests per window.
