@@ -1,0 +1,6 @@
+{
+  // Absolute path to the database file.
+  "databaseFileLocation": "/home/calum/dev/controller-id-db/debug/database.sqlite3",
+  // Port the server should run on.
+  "port": 8080
+}
