@@ -4,7 +4,7 @@ import rateLimit from "express-rate-limit";
 import { Database } from 'sqlite-async';
 import getConfig from "./config.js";
 import { APIResponse, Controller, ControllerSubmission } from "./types.js";
-import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControllersFromDatabase } from "./utils.js";
+import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControllersFromDatabase, updateControlifyVersionForController } from "./utils.js";
 
 (async () => {
   const config = getConfig();
@@ -16,7 +16,8 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
     ControllerID INTEGER PRIMARY KEY AUTOINCREMENT,
     VendorID INTEGER,
     ProductID INTEGER,
-    GUID TEXT
+    GUID TEXT,
+    ControlifyVersion TEXT
 );
 
   CREATE TABLE IF NOT EXISTS ReportedNames (
@@ -54,6 +55,8 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
     const reportedNameExistance = await checkExistance(submission, db);
 
     if (reportedNameExistance.isDuplicate) {
+      updateControlifyVersionForController(submission, reportedNameExistance.controllerID, db);
+
       console.log("Submission is duplicate - ignoring!")
       const response: APIResponse = {
         message: "Submission has already been recorded into the database.",
@@ -64,26 +67,17 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
         // If the controller doesn't exist already.
         if (reportedNameExistance.controllerID == undefined) {
           let stmt = await db.prepare(`
-          INSERT INTO Controllers(VendorID, ProductID, GUID) VALUES (?, ?, ?)
-        `);
-          console.log("1")
+            INSERT INTO Controllers(VendorID, ProductID, GUID) VALUES (?, ?, ?)
+          `);
 
-          stmt.run(submission.vendorID, submission.productID, submission.GUID);
-          console.log("2")
+          await stmt.run(submission.vendorID, submission.productID, submission.GUID);
+
           stmt.finalize();
 
           stmt = await db.prepare(`SELECT last_insert_rowid() AS controllerID`);
 
           try {
-            const row: any = await new Promise((resolve, reject) => {
-              stmt.get((_err: Error, row: any) => {
-                if (_err || !row) {
-                  reject(_err || new Error("Failed to insert reported name into database. last_insert_rowid() did not work."));
-                } else {
-                  resolve(row);
-                }
-              });
-            });
+            const row: any = await stmt.get();
 
             reportedNameExistance.controllerID = row.controllerID;
           } catch (err) {
@@ -102,8 +96,10 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
           INSERT INTO ReportedNames(ControllerID, ReportedName) VALUES (?, ?)
         `);
 
-        stmt.run(reportedNameExistance.controllerID, submission.reportedName);
+        await stmt.run(reportedNameExistance.controllerID, submission.reportedName);
         stmt.finalize();
+
+        updateControlifyVersionForController(submission, reportedNameExistance.controllerID, db);
 
         const response: APIResponse = {
           message: "Submitted data. Thank you!"

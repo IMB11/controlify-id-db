@@ -1,22 +1,23 @@
 import { Database } from 'sqlite-async';
 import { Controller, ControllerSubmission } from "./types.js";
+import * as semver from "semver";
 
 export const isSubmissionValid = (submission: ControllerSubmission): boolean =>
-  !!submission.GUID && !!submission.productID && !!submission.reportedName && !!submission.vendorID;
+  !!submission.GUID && !!submission.productID && !!submission.reportedName && !!submission.vendorID && !!submission.controlifyVersion;
 
 export async function getControllersFromDatabase(db: Database): Promise<Controller[]> {
   const controllers: Controller[] = [];
 
   try {
     const query = `
-        SELECT VendorID, ProductID, GUID, ControllerID
+        SELECT *
         FROM Controllers
       `;
 
     const rows: any = await db.all(query);
 
     for (const row of rows) {
-      const { VendorID, ProductID, GUID, ControllerID } = row;
+      const { VendorID, ProductID, GUID, ControllerID, ControlifyVersion } = row;
       const reportedNamesQuery = `
           SELECT ReportedName
           FROM ReportedNames
@@ -31,6 +32,7 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
         productID: ProductID,
         GUID: GUID,
         reportedNames: reportedNames,
+        lastSeenVersion: ControlifyVersion
       };
 
       controllers.push(controller);
@@ -67,6 +69,42 @@ export function getControllerIDIfExists(
       resolve(result.ControllerID);
     }
   });
+}
+
+export async function updateControlifyVersionForController(
+  submission: ControllerSubmission,
+  controllerID: number,
+  db: Database
+): Promise<void> {
+  try {
+    const query = `
+      SELECT ControlifyVersion
+      FROM Controllers
+      WHERE controllerID = ?
+    `;
+
+    const row: any = await db.get(query, controllerID);
+
+    if (!row) {
+      throw new Error(`Controller with ID ${controllerID} not found.`);
+    }
+
+    const currentVersionString = row?.ControlifyVersion ?? "0.0.0";
+
+    if (semver.gt(submission.controlifyVersion, currentVersionString)) {
+      const updateQuery = `
+        UPDATE Controllers
+        SET ControlifyVersion = ?
+        WHERE controllerID = ?
+      `;
+
+      await db.run(updateQuery, submission.controlifyVersion, controllerID);
+    }
+  } catch (error) {
+    // Handle any potential errors
+    console.log(error);
+    throw error;
+  }
 }
 
 export function isReportedNameDuplicate(
