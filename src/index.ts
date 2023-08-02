@@ -19,6 +19,7 @@ import * as cors from "cors";
     VendorID INTEGER,
     ProductID INTEGER,
     GUID TEXT,
+    TimesSeen INTEGER DEFAULT 0,
     ControlifyVersion TEXT
 );
 

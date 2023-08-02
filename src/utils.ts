@@ -79,7 +79,7 @@ export async function updateControlifyVersionForController(
 ): Promise<void> {
   try {
     const query = `
-      SELECT ControlifyVersion
+      SELECT ControlifyVersion, TimesSeen
       FROM Controllers
       WHERE controllerID = ?
     `;
@@ -91,15 +91,17 @@ export async function updateControlifyVersionForController(
     }
 
     const currentVersionString = row?.ControlifyVersion ?? "0.0.0";
+    const timesSeen = row?.TimesSeen ?? 0;
 
     if (semver.gt(submission.controlifyVersion, currentVersionString)) {
       const updateQuery = `
         UPDATE Controllers
-        SET ControlifyVersion = ?
+        SET ControlifyVersion = ?,
+            TimesSeen = ?
         WHERE controllerID = ?
       `;
 
-      await db.run(updateQuery, submission.controlifyVersion, controllerID);
+      await db.run(updateQuery, submission.controlifyVersion, timesSeen + 1, controllerID);
     }
   } catch (error) {
     // Handle any potential errors

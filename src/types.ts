@@ -4,7 +4,8 @@ export interface Controller {
   productID: string,
   GUID: string,
   reportedNames: string[],
-  lastSeenVersion: string
+  lastSeenVersion: string,
+  timesSeen: number
 }
 
 export interface APIResponse {
