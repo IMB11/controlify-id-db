@@ -17,7 +17,7 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
     const rows: any = await db.all(query);
 
     for (const row of rows) {
-      const { VendorID, ProductID, GUID, ControllerID, ControlifyVersion } = row;
+      const { VendorID, ProductID, GUID, ControllerID, ControlifyVersion, TimesSeen } = row;
       const reportedNamesQuery = `
           SELECT ReportedName
           FROM ReportedNames
@@ -33,7 +33,8 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
         productID: "0x" + ProductID.toString(16).toUpperCase(),
         GUID: GUID,
         reportedNames: reportedNames,
-        lastSeenVersion: ControlifyVersion
+        lastSeenVersion: ControlifyVersion,
+        timesSeen: TimesSeen
       };
 
       controllers.push(controller);
