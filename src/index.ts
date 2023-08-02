@@ -5,6 +5,8 @@ import { Database } from 'sqlite-async';
 import getConfig from "./config.js";
 import { APIResponse, Controller, ControllerSubmission } from "./types.js";
 import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControllersFromDatabase, updateControlifyVersionForController } from "./utils.js";
+import * as cors from "cors";
+
 
 (async () => {
   const config = getConfig();
@@ -28,6 +30,7 @@ import { controllerAlreadyExists, checkExistance, isSubmissionValid, getControll
   );
 `);
 
+  app.use(cors());
   app.use(bodyParser.json());
   app.use("/api/v1/submit",
     rateLimit({
