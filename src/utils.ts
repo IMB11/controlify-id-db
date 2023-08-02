@@ -29,8 +29,8 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
 
       const controller: Controller = {
         databaseID: ControllerID,
-        vendorID: "0x" + VendorID.toString(16),
-        productID: "0x" + ProductID.toString(16),
+        vendorID: "0x" + VendorID.toString(16).toUpperCase(),
+        productID: "0x" + ProductID.toString(16).toUpperCase(),
         GUID: GUID,
         reportedNames: reportedNames,
         lastSeenVersion: ControlifyVersion
