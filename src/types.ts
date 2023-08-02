@@ -1,7 +1,7 @@
 export interface Controller {
   databaseID: number,
-  vendorID: number,
-  productID: number,
+  vendorID: string,
+  productID: string,
   GUID: string,
   reportedNames: string[],
   lastSeenVersion: string
