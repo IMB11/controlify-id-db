@@ -99,10 +99,18 @@ export async function updateControlifyVersionForController(
         UPDATE Controllers
         SET ControlifyVersion = ?,
             TimesSeen = ?
-        WHERE controllerID = ?
+        WHERE ControllerID = ?
       `;
 
       await db.run(updateQuery, submission.controlifyVersion, timesSeen + 1, controllerID);
+    } else {
+      const updateQuery = `
+        UPDATE Controllers
+        SET TimesSeen = ?
+        WHERE ControllerID = ?
+      `
+
+      await db.run(updateQuery, timesSeen + 1, controllerID);
     }
   } catch (error) {
     // Handle any potential errors
