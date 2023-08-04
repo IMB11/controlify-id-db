@@ -47,7 +47,7 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
         reportedNames: reportedNames,
         lastSeenVersion: ControlifyVersion,
         timesSeen: TimesSeen,
-        percentageOperational: totalOperationalPercentage
+        percentageOperational: Math.round(totalOperationalPercentage)
       };
 
       controllers.push(controller);
