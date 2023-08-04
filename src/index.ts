@@ -21,12 +21,13 @@ import * as cors from "cors";
     GUID TEXT,
     TimesSeen INTEGER DEFAULT 0,
     ControlifyVersion TEXT
-);
+  );
 
   CREATE TABLE IF NOT EXISTS ReportedNames (
     ReportedNameID INTEGER PRIMARY KEY AUTOINCREMENT,
     ControllerID INTEGER,
     ReportedName TEXT,
+    Operational INTEGER,
     FOREIGN KEY (controllerID) REFERENCES Controllers (controllerID)
   );
 `);
@@ -133,10 +134,10 @@ import * as cors from "cors";
         }
 
         let stmt = await db.prepare(`
-          INSERT INTO ReportedNames(ControllerID, ReportedName) VALUES (?, ?)
+          INSERT INTO ReportedNames(ControllerID, ReportedName, Operational) VALUES (?, ?, ?)
         `);
 
-        await stmt.run(reportedNameExistance.controllerID, submission.reportedName);
+        await stmt.run(reportedNameExistance.controllerID, submission.reportedName, +submission.operational);
         stmt.finalize();
 
         updateControlifyVersionForController(submission, reportedNameExistance.controllerID, db);

@@ -5,7 +5,8 @@ export interface Controller {
   GUID: string,
   reportedNames: string[],
   lastSeenVersion: string,
-  timesSeen: number
+  timesSeen: number,
+  percentageOperational: number
 }
 
 export interface APIResponse {
@@ -19,5 +20,6 @@ export interface ControllerSubmission {
   productID: number,
   GUID: string,
   reportedName: string,
-  controlifyVersion: string
+  controlifyVersion: string,
+  operational: boolean,
 }

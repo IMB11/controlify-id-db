@@ -19,13 +19,25 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
     for (const row of rows) {
       const { VendorID, ProductID, GUID, ControllerID, ControlifyVersion, TimesSeen } = row;
       const reportedNamesQuery = `
-          SELECT ReportedName
+          SELECT ReportedName, Operational
           FROM ReportedNames
           WHERE ControllerID = ?
         `;
 
       const reportedNamesRows = await db.all(reportedNamesQuery, ControllerID);
-      const reportedNames = reportedNamesRows.map((reportedNameRow: any) => reportedNameRow.ReportedName);
+      let reportedNames = reportedNamesRows.map((reportedNameRow: any) => reportedNameRow.ReportedName);
+
+      reportedNames = [...new Set(reportedNames)]
+
+      const operationals = reportedNamesRows.map((reportedNamesRow: any) => reportedNamesRow.Operational);
+
+      let totalOperational = 0;
+
+      operationals.forEach(operational => {
+        totalOperational += operational;
+      });
+
+      const totalOperationalPercentage = (totalOperational / operationals.length) * 100;
 
       const controller: Controller = {
         databaseID: ControllerID,
@@ -34,7 +46,8 @@ export async function getControllersFromDatabase(db: Database): Promise<Controll
         GUID: GUID,
         reportedNames: reportedNames,
         lastSeenVersion: ControlifyVersion,
-        timesSeen: TimesSeen
+        timesSeen: TimesSeen,
+        percentageOperational: totalOperationalPercentage
       };
 
       controllers.push(controller);
@@ -122,26 +135,8 @@ export async function updateControlifyVersionForController(
 export function isReportedNameDuplicate(
   submission: ControllerSubmission,
   db: Database
-): Promise<boolean> {
-  return new Promise<boolean>(async (resolve, reject) => {
-    const reportedNameQuery = `
-      SELECT COUNT(*) AS count
-      FROM ReportedNames
-      WHERE ReportedName = ?
-    `;
-
-    const result: any = await db.get(
-      reportedNameQuery,
-      submission.reportedName
-    );
-
-    if (!result || !result?.count) {
-      resolve(false);
-    } else {
-      const count = result.count;
-      resolve(count > 0);
-    }
-  });
+): boolean {
+  return false;
 }
 
 interface ExistanceCheckResult {
